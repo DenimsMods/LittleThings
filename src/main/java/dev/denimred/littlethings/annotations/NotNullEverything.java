@@ -18,7 +18,6 @@ import static java.lang.annotation.ElementType.*;
  * <p>
  * Note that this annotation only serves the purpose of aiding static analysis and will be ignored at runtime.
  */
-@SuppressWarnings("unused")
 @Documented
 @Retention(RetentionPolicy.CLASS)
 @TypeQualifierDefault({FIELD, METHOD, PARAMETER, TYPE_PARAMETER, TYPE_USE, RECORD_COMPONENT})

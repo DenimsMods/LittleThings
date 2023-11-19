@@ -5,19 +5,36 @@ useless) ways. This includes static analysis annotations, easy-to-use abstractio
 
 ## Features
 
-### [@NotNullEverything](src/main/java/dev/denimred/littlethings/annotations/NotNullEverything.java)
+### Static Analysis Annotations
+
+#### [@NbtType](src/main/java/dev/denimred/littlethings/annotations/NbtType.java)
+
+A type-qualifying annotation that indicates the provided value must be a valid NBT type constant. Helps prevent the use
+of simple integers over the constants available in `Tag` and verifies that the input is a valid type.
+
+#### [@NotNullEverything](src/main/java/dev/denimred/littlethings/annotations/NotNullEverything.java)
 
 An annotation that can be applied to entire classes or packages to assume *everything* is not null by default. Or,
 y'know, you could just use [Kotlin](https://kotlinlang.org/) if you're into that.
 
-Does nothing at runtime, like most other static analysis annotations.
+#### [@Resource](src/main/java/dev/denimred/littlethings/annotations/Resource.java) (and variants)
 
-### [@Resource](src/main/java/dev/denimred/littlethings/annotations/Resource.java) (and variants)
+A type-qualifying annotation applicable to strings that indicates the provided string must be part of a valid resource
+location. Handy in some cases. Offers namespace-specific and path-specific variants.
 
-An annotation applicable to strings that indicates the provided string must be part of a valid resource location. Handy
-in some cases, but only offers static analysis checking and doesn't do anything at runtime.
+### Miscellaneous Little Things
 
-Offers namespace-specific and path-specific variants.
+#### [Facets](src/main/java/dev/denimred/littlethings/facet/Facet.java)
+
+An abstraction around item stack NBT data that includes type checking and helps reduce bugs caused by typos.
+
+[//]: # (TODO: Describe Facets with more detail)
+
+#### [TODO Function and Error](src/main/java/dev/denimred/littlethings/misc/Todo.java)
+
+A Java version of [Kotlin's `TODO` function](https://kotlinlang.org/docs/idioms.html#mark-code-as-incomplete-todo),
+sorta. Will always throw a special `Todo` error, optionally with a message attached. Unfortunately does not create a
+todo entry in the IDE. Still, might be handy for quick testing or iteration.
 
 ## Usage
 

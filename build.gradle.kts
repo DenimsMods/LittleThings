@@ -5,10 +5,17 @@ plugins {
 }
 
 group = "dev.denimred"
-version = "0.1.0"
+version = "0.2.0"
 base.archivesName = "littlethings"
 
 minecraft { version("1.18.2") }
+
+dependencies {
+    testImplementation(platform("org.junit:junit-bom:5.10.1"))
+    testImplementation("org.junit.jupiter:junit-jupiter:5.10.1")
+}
+
+tasks.test { useJUnitPlatform() }
 
 tasks.jar { from("LICENSE") }
 
