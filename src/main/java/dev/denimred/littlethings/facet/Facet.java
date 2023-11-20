@@ -2,14 +2,16 @@ package dev.denimred.littlethings.facet;
 
 import dev.denimred.littlethings.annotations.NbtType;
 import dev.denimred.littlethings.annotations.NotNullEverything;
-import dev.denimred.littlethings.func.TriConsumer;
+import dev.denimred.littlethings.facet.Facet.Writer.Remove;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.VisibleForTesting;
 
+import javax.annotation.concurrent.Immutable;
 import java.util.NoSuchElementException;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -148,7 +150,11 @@ public final class Facet<T> {
      */
     @Contract(mutates = "param1")
     public void set(ItemStack stack, T value) {
-        if (!writer.write(getOrCreateLastTag(stack, path), name, value)) remove(stack);
+        try {
+            writer.write(getOrCreateLastTag(stack, path), name, value);
+        } catch (Remove ignored) {
+            remove(stack);
+        }
     }
 
     /**
@@ -245,11 +251,12 @@ public final class Facet<T> {
          * @return the data that was stored in the tag, or null if the data couldn't be read or was invalid.
          */
         @Contract(pure = true)
+        @ApiStatus.OverrideOnly
         @Nullable T read(CompoundTag tag, String name);
     }
 
     /**
-     * Writes NBT data to {@link CompoundTag} after mapping it from the associated type.
+     * Writes NBT data to a {@link CompoundTag} after mapping it from the associated type.
      *
      * @param <T> the type of data that is to be written to the tag.
      */
@@ -261,24 +268,48 @@ public final class Facet<T> {
          * @param tag   the tag to write data to.
          * @param name  the name of the data tag to be inserted into the containing tag.
          * @param value the data to be written to the tag.
-         * @return true if input value was written, false if the stored data should be removed.
+         * @throws Remove to indicate that the value being written should instead be removed.
          */
         @Contract(mutates = "param1")
-        boolean write(CompoundTag tag, String name, T value);
+        @ApiStatus.OverrideOnly
+        void write(CompoundTag tag, String name, T value) throws Remove;
 
         /**
-         * Constructs a {@link Writer} that will always return true.
+         * Call in the body of {@link #write} to immediately return and tell the facet to instead remove the data being written to.
+         * <b>Always throws an exception; execution following this function will always cease.</b>
          *
-         * @param operation the writing operation to be used by the writer.
-         * @param <T> the type that the returned writer will handle.
-         * @return a new {@link Writer} that will always return true.
+         * @throws Remove to indicate that the value being written should instead be removed.
          */
-        @Contract(value = "_ -> new", pure = true)
-        static <T> Writer<T> permissive(TriConsumer<CompoundTag, String, T> operation) {
-            return (tag, name, value) -> {
-                operation.accept(tag, name, value);
-                return true;
-            };
+        @Contract(value = "-> fail", pure = true)
+        static void remove() throws Remove {
+            throw Remove.INSTANCE;
+        }
+
+        /**
+         * Throwable used for flow control by {@link #write} to indicate that data being written should instead be discarded and removed from the tag.
+         */
+        @Immutable
+        final class Remove extends Throwable {
+            private static final Remove INSTANCE = new Remove();
+
+            private Remove() {
+                super();
+            }
+
+            @Override
+            public Throwable initCause(Throwable cause) {
+                return this;
+            }
+
+            @Override
+            public Throwable fillInStackTrace() {
+                return this;
+            }
+
+            @Override
+            public void setStackTrace(StackTraceElement[] stackTrace) {
+                // no-op
+            }
         }
     }
 }

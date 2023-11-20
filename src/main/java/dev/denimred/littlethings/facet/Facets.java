@@ -9,7 +9,7 @@ import org.jetbrains.annotations.Contract;
 
 import java.util.UUID;
 
-import static dev.denimred.littlethings.facet.Facet.Writer.permissive;
+import static dev.denimred.littlethings.facet.Facet.Writer.remove;
 import static net.minecraft.nbt.Tag.*;
 
 /**
@@ -27,7 +27,7 @@ public final class Facets {
      */
     @Contract(value = "_, _ -> new", pure = true)
     public static Facet<Boolean> booleanFacet(String pathFirst, String... pathRem) {
-        return new Facet<>(TAG_BYTE, CompoundTag::getBoolean, permissive(CompoundTag::putBoolean), pathFirst, pathRem);
+        return new Facet<>(TAG_BYTE, CompoundTag::getBoolean, CompoundTag::putBoolean, pathFirst, pathRem);
     }
 
     /**
@@ -39,7 +39,7 @@ public final class Facets {
      */
     @Contract(value = "_, _ -> new", pure = true)
     public static Facet<Byte> byteFacet(String pathFirst, String... pathRem) {
-        return new Facet<>(TAG_BYTE, CompoundTag::getByte, permissive(CompoundTag::putByte), pathFirst, pathRem);
+        return new Facet<>(TAG_BYTE, CompoundTag::getByte, CompoundTag::putByte, pathFirst, pathRem);
     }
 
     /**
@@ -51,7 +51,7 @@ public final class Facets {
      */
     @Contract(value = "_, _ -> new", pure = true)
     public static Facet<Short> shortFacet(String pathFirst, String... pathRem) {
-        return new Facet<>(TAG_SHORT, CompoundTag::getShort, permissive(CompoundTag::putShort), pathFirst, pathRem);
+        return new Facet<>(TAG_SHORT, CompoundTag::getShort, CompoundTag::putShort, pathFirst, pathRem);
     }
 
     /**
@@ -63,7 +63,7 @@ public final class Facets {
      */
     @Contract(value = "_, _ -> new", pure = true)
     public static Facet<Integer> intFacet(String pathFirst, String... pathRem) {
-        return new Facet<>(TAG_INT, CompoundTag::getInt, permissive(CompoundTag::putInt), pathFirst, pathRem);
+        return new Facet<>(TAG_INT, CompoundTag::getInt, CompoundTag::putInt, pathFirst, pathRem);
     }
 
     /**
@@ -75,7 +75,7 @@ public final class Facets {
      */
     @Contract(value = "_, _ -> new", pure = true)
     public static Facet<Long> longFacet(String pathFirst, String... pathRem) {
-        return new Facet<>(TAG_LONG, CompoundTag::getLong, permissive(CompoundTag::putLong), pathFirst, pathRem);
+        return new Facet<>(TAG_LONG, CompoundTag::getLong, CompoundTag::putLong, pathFirst, pathRem);
     }
 
     /**
@@ -87,7 +87,7 @@ public final class Facets {
      */
     @Contract(value = "_, _ -> new", pure = true)
     public static Facet<Float> floatFacet(String pathFirst, String... pathRem) {
-        return new Facet<>(TAG_FLOAT, CompoundTag::getFloat, permissive(CompoundTag::putFloat), pathFirst, pathRem);
+        return new Facet<>(TAG_FLOAT, CompoundTag::getFloat, CompoundTag::putFloat, pathFirst, pathRem);
     }
 
     /**
@@ -99,7 +99,7 @@ public final class Facets {
      */
     @Contract(value = "_, _ -> new", pure = true)
     public static Facet<Double> doubleFacet(String pathFirst, String... pathRem) {
-        return new Facet<>(TAG_DOUBLE, CompoundTag::getDouble, permissive(CompoundTag::putDouble), pathFirst, pathRem);
+        return new Facet<>(TAG_DOUBLE, CompoundTag::getDouble, CompoundTag::putDouble, pathFirst, pathRem);
     }
 
     /**
@@ -111,7 +111,7 @@ public final class Facets {
      */
     @Contract(value = "_, _ -> new", pure = true)
     public static Facet<byte[]> byteArrayFacet(String pathFirst, String... pathRem) {
-        return new Facet<>(TAG_BYTE_ARRAY, CompoundTag::getByteArray, permissive(CompoundTag::putByteArray), pathFirst, pathRem);
+        return new Facet<>(TAG_BYTE_ARRAY, CompoundTag::getByteArray, CompoundTag::putByteArray, pathFirst, pathRem);
     }
 
     /**
@@ -123,7 +123,7 @@ public final class Facets {
      */
     @Contract(value = "_, _ -> new", pure = true)
     public static Facet<int[]> intArrayFacet(String pathFirst, String... pathRem) {
-        return new Facet<>(TAG_INT_ARRAY, CompoundTag::getIntArray, permissive(CompoundTag::putIntArray), pathFirst, pathRem);
+        return new Facet<>(TAG_INT_ARRAY, CompoundTag::getIntArray, CompoundTag::putIntArray, pathFirst, pathRem);
     }
 
     /**
@@ -135,7 +135,7 @@ public final class Facets {
      */
     @Contract(value = "_, _ -> new", pure = true)
     public static Facet<long[]> longArrayFacet(String pathFirst, String... pathRem) {
-        return new Facet<>(TAG_LONG_ARRAY, CompoundTag::getLongArray, permissive(CompoundTag::putLongArray), pathFirst, pathRem);
+        return new Facet<>(TAG_LONG_ARRAY, CompoundTag::getLongArray, CompoundTag::putLongArray, pathFirst, pathRem);
     }
 
     /**
@@ -147,7 +147,7 @@ public final class Facets {
      */
     @Contract(value = "_, _ -> new", pure = true)
     public static Facet<String> stringFacet(String pathFirst, String... pathRem) {
-        return new Facet<>(TAG_STRING, CompoundTag::getString, permissive(CompoundTag::putString), pathFirst, pathRem);
+        return new Facet<>(TAG_STRING, CompoundTag::getString, CompoundTag::putString, pathFirst, pathRem);
     }
 
     /**
@@ -159,7 +159,7 @@ public final class Facets {
      */
     @Contract(value = "_, _ -> new", pure = true)
     public static Facet<CompoundTag> tagFacet(String pathFirst, String... pathRem) {
-        return new Facet<>(TAG_COMPOUND, CompoundTag::getCompound, permissive(CompoundTag::put), pathFirst, pathRem);
+        return new Facet<>(TAG_COMPOUND, CompoundTag::getCompound, CompoundTag::put, pathFirst, pathRem);
     }
 
     /**
@@ -171,7 +171,7 @@ public final class Facets {
      */
     @Contract(value = "_, _ -> new", pure = true)
     public static Facet<UUID> uuidFacet(String pathFirst, String... pathRem) {
-        return new Facet<>(TAG_INT_ARRAY, CompoundTag::getUUID, permissive(CompoundTag::putUUID), pathFirst, pathRem);
+        return new Facet<>(TAG_INT_ARRAY, CompoundTag::getUUID, CompoundTag::putUUID, pathFirst, pathRem);
     }
 
     /**
@@ -184,7 +184,7 @@ public final class Facets {
      */
     @Contract(value = "_, _, _ -> new", pure = true)
     public static Facet<ListTag> listFacet(@NbtType byte listType, String pathFirst, String... pathRem) {
-        return new Facet<>(TAG_LIST, (tag, name) -> tag.getList(name, listType), permissive(CompoundTag::put), pathFirst, pathRem);
+        return new Facet<>(TAG_LIST, (tag, name) -> tag.getList(name, listType), CompoundTag::put, pathFirst, pathRem);
     }
 
     /**
@@ -197,9 +197,8 @@ public final class Facets {
     @Contract(value = "_, _ -> new", pure = true)
     public static Facet<ItemStack> stackFacet(String pathFirst, String... pathRem) {
         return new Facet<>(TAG_COMPOUND, (tag, name) -> ItemStack.of(tag.getCompound(name)), (tag, name, value) -> {
-            if (value.isEmpty()) return false;
+            if (value.isEmpty()) remove();
             tag.put(name, value.save(new CompoundTag()));
-            return true;
         }, pathFirst, pathRem);
     }
 
