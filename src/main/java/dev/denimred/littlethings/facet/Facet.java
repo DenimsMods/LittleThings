@@ -77,6 +77,7 @@ public final class Facet<T> {
      * @param stack the item stack containing the NBT data to check.
      * @return true if the given stack contains NBT data pertaining to this facet.
      */
+    @Contract(pure = true)
     public boolean isIn(ItemStack stack) {
         var tag = getLastTag(stack, path);
         return tag != null && tag.contains(name, type);
@@ -88,6 +89,7 @@ public final class Facet<T> {
      * @param stack the item stack containing the NBT data to retrieve.
      * @return the facet data stored in the stack, or null if no applicable data was present.
      */
+    @Contract(pure = true)
     public @Nullable T get(ItemStack stack) {
         var tag = getLastTag(stack, path);
         if (tag == null || !tag.contains(name, type)) return null;
@@ -101,6 +103,7 @@ public final class Facet<T> {
      * @param fallback the value to return if no data was present.
      * @return the facet data stored in the stack, or the provided fallback if no applicable data was present.
      */
+    @Contract(pure = true)
     public T getOr(ItemStack stack, T fallback) {
         @Nullable T result = get(stack);
         return result != null ? result : fallback;
@@ -113,6 +116,7 @@ public final class Facet<T> {
      * @return the facet data stored in the stack.
      * @throws NoSuchElementException if no applicable data was present in the stack.
      */
+    @Contract(pure = true)
     public T getOrThrow(ItemStack stack) throws NoSuchElementException {
         @Nullable T result = get(stack);
         if (result == null) throw new NoSuchElementException();
@@ -126,6 +130,7 @@ public final class Facet<T> {
      * @param value the value to be written to the stack.
      * @return the value previously held within the stack, or null if nothing was present.
      */
+    @Contract(mutates = "param1")
     public @Nullable T set(ItemStack stack, T value) {
         @Nullable T existing = get(stack);
         writer.write(getOrCreateLastTag(stack, path), name, value);
@@ -138,6 +143,7 @@ public final class Facet<T> {
      * @param stack the stack to remove data from.
      * @return the value previously held within the stack, or null if nothing was present.
      */
+    @Contract(mutates = "param1")
     public @Nullable T remove(ItemStack stack) {
         @Nullable T existing = get(stack);
         if (!stack.hasTag()) return existing;

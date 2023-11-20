@@ -3,8 +3,6 @@ package dev.denimred.littlethings.facet;
 import dev.denimred.littlethings.annotations.NotNullEverything;
 import net.minecraft.DetectedVersion;
 import net.minecraft.SharedConstants;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.server.Bootstrap;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -23,12 +21,8 @@ class FacetTest {
         Bootstrap.bootStrap();
     }
 
-    private static Facet<Integer> intFacet(String pathFirst, String... pathRem) {
-        return new Facet<>(Tag.TAG_INT, CompoundTag::getInt, CompoundTag::putInt, pathFirst, pathRem);
-    }
-
     private static Facet<Integer> intFacet() {
-        return intFacet("test", "facet");
+        return Facets.intFacet("test", "facet");
     }
 
     private static ItemStack freshStack() {
@@ -37,14 +31,14 @@ class FacetTest {
 
     @Test
     void initNameOnly() {
-        Facet<Integer> facet = intFacet("some_facet");
+        Facet<Integer> facet = Facets.intFacet("some_facet");
         assertEquals("some_facet", facet.name);
         assertArrayEquals(new String[0], facet.path);
     }
 
     @Test
     void initWithPath() {
-        Facet<Integer> facet = intFacet("some", "path", "thing", "some_facet");
+        Facet<Integer> facet = Facets.intFacet("some", "path", "thing", "some_facet");
         assertEquals("some_facet", facet.name);
         assertArrayEquals(new String[]{"some", "path", "thing"}, facet.path);
     }
