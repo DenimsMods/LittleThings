@@ -2,6 +2,7 @@ package dev.denimred.littlethings.facet;
 
 import dev.denimred.littlethings.annotations.NbtType;
 import dev.denimred.littlethings.annotations.NotNullEverything;
+import dev.denimred.littlethings.func.TriConsumer;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.world.item.ItemStack;
@@ -11,8 +12,8 @@ import org.jetbrains.annotations.VisibleForTesting;
 
 import java.util.NoSuchElementException;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.function.UnaryOperator;
 
 /**
  * A simple abstraction around {@link ItemStack} NBT data.
@@ -147,7 +148,7 @@ public final class Facet<T> {
      */
     @Contract(mutates = "param1")
     public void set(ItemStack stack, T value) {
-        writer.write(getOrCreateLastTag(stack, path), name, value);
+        if (!writer.write(getOrCreateLastTag(stack, path), name, value)) remove(stack);
     }
 
     /**
@@ -160,7 +161,7 @@ public final class Facet<T> {
      * @see #mutate
      */
     @Contract(mutates = "param1")
-    public boolean modify(ItemStack stack, Function<T, T> modifier) {
+    public boolean modify(ItemStack stack, UnaryOperator<T> modifier) {
         @Nullable T value = get(stack);
         if (value == null) return false;
         set(stack, modifier.apply(value));
@@ -191,19 +192,17 @@ public final class Facet<T> {
      * Removes data from the provided stack.
      *
      * @param stack the stack to remove data from.
-     * @return the value previously held within the stack, or null if nothing was present.
      */
     @Contract(mutates = "param1")
-    public @Nullable T remove(ItemStack stack) {
-        @Nullable T existing = get(stack);
-        if (!stack.hasTag()) return existing;
+    public void remove(ItemStack stack) {
+        if (!stack.hasTag()) return;
         var root = stack.getTag();
         assert root != null; // Sanity check; hasTag covers this
 
         // Special case for empty path
         if (path.length == 0 && root.contains(name, type)) {
             stack.removeTagKey(name);
-            return existing;
+            return;
         }
 
         // Collect all tags along the path
@@ -221,7 +220,7 @@ public final class Facet<T> {
 
         // Recursively remove empty tags, starting from the end
         for (int i = lastIndex; i >= 0; i--) {
-            if (!tags[i].isEmpty()) return existing;
+            if (!tags[i].isEmpty()) return;
             var key = path[i];
             if (i == 0) {
                 stack.removeTagKey(key);
@@ -229,8 +228,6 @@ public final class Facet<T> {
                 tags[i - 1].remove(key);
             }
         }
-
-        return existing;
     }
 
     /**
@@ -245,10 +242,10 @@ public final class Facet<T> {
          *
          * @param tag  the tag that contains the data to read.
          * @param name the name of the element within the tag that represents the data to read.
-         * @return the data that was stored in the tag, mapped to the appropriate type.
+         * @return the data that was stored in the tag, or null if the data couldn't be read or was invalid.
          */
         @Contract(pure = true)
-        T read(CompoundTag tag, String name);
+        @Nullable T read(CompoundTag tag, String name);
     }
 
     /**
@@ -264,8 +261,24 @@ public final class Facet<T> {
          * @param tag   the tag to write data to.
          * @param name  the name of the data tag to be inserted into the containing tag.
          * @param value the data to be written to the tag.
+         * @return true if input value was written, false if the stored data should be removed.
          */
         @Contract(mutates = "param1")
-        void write(CompoundTag tag, String name, T value);
+        boolean write(CompoundTag tag, String name, T value);
+
+        /**
+         * Constructs a {@link Writer} that will always return true.
+         *
+         * @param operation the writing operation to be used by the writer.
+         * @param <T> the type that the returned writer will handle.
+         * @return a new {@link Writer} that will always return true.
+         */
+        @Contract(value = "_ -> new", pure = true)
+        static <T> Writer<T> permissive(TriConsumer<CompoundTag, String, T> operation) {
+            return (tag, name, value) -> {
+                operation.accept(tag, name, value);
+                return true;
+            };
+        }
     }
 }

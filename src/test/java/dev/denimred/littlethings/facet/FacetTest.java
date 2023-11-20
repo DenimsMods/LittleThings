@@ -115,8 +115,7 @@ class FacetTest {
         assertFalse(facet.mutate(stack, s -> s.shrink(s.getCount())));
         facet.set(stack, freshStack());
         assertTrue(facet.mutate(stack, s -> s.shrink(s.getCount())));
-        var stored = facet.get(stack);
-        assertNotNull(stored);
+        var stored = facet.getOr(stack, ItemStack.EMPTY);
         assertTrue(stored.isEmpty());
     }
 
@@ -125,11 +124,11 @@ class FacetTest {
         Facet<Integer> facet = intFacet();
         ItemStack stack = freshStack();
         assertFalse(facet.isIn(stack));
-        assertNull(facet.remove(stack));
+        facet.remove(stack);
         assertFalse(facet.isIn(stack));
         facet.set(stack, 1);
         assertTrue(facet.isIn(stack));
-        assertEquals(1, facet.remove(stack));
+        facet.remove(stack);
         assertFalse(facet.isIn(stack));
     }
 }

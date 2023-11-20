@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "dev.denimred"
-version = "0.3.1"
+version = "0.3.2"
 base.archivesName = "littlethings"
 
 minecraft { version("1.18.2") }
