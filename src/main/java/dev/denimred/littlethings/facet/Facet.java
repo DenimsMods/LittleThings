@@ -10,6 +10,9 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.VisibleForTesting;
 
 import java.util.NoSuchElementException;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  * A simple abstraction around {@link ItemStack} NBT data.
@@ -112,6 +115,19 @@ public final class Facet<T> {
     /**
      * Retrieves data from the provided stack.
      *
+     * @param stack    the item stack containing the NBT data to retrieve.
+     * @param fallback the supplier to call and return the result of if no data was present.
+     * @return the facet data stored in the stack, or the result of the provided fallback if no applicable data was present.
+     */
+    @Contract(pure = true)
+    public T getOrGet(ItemStack stack, Supplier<T> fallback) {
+        @Nullable T result = get(stack);
+        return result != null ? result : fallback.get();
+    }
+
+    /**
+     * Retrieves data from the provided stack.
+     *
      * @param stack the item stack containing the NBT data to retrieve.
      * @return the facet data stored in the stack.
      * @throws NoSuchElementException if no applicable data was present in the stack.
@@ -128,13 +144,43 @@ public final class Facet<T> {
      *
      * @param stack the item stack to write the provided value to.
      * @param value the value to be written to the stack.
-     * @return the value previously held within the stack, or null if nothing was present.
      */
     @Contract(mutates = "param1")
-    public @Nullable T set(ItemStack stack, T value) {
-        @Nullable T existing = get(stack);
+    public void set(ItemStack stack, T value) {
         writer.write(getOrCreateLastTag(stack, path), name, value);
-        return existing;
+    }
+
+    /**
+     * Modifies the data stored in the stack's NBT data.
+     * Typically only used for immutable data structures like integers and strings.
+     *
+     * @param stack    the item stack to write the provided value to.
+     * @param initial  the initial fallback value to provide to the modifier if no existing data was found.
+     * @param modifier the modifier function that will be applied to the stored value, or the initial fallback.
+     * @see #mutate
+     */
+    @Contract(mutates = "param1")
+    public void modify(ItemStack stack, T initial, Function<T, T> modifier) {
+        set(stack, modifier.apply(getOr(stack, initial)));
+    }
+
+    /**
+     * Mutates the data stored in the stack's NBT data.
+     * Similar to the modify function, but assumes the data type is mutable.
+     * A supplier is used for the initial fallback to help ensure new data is provided if needed, and reduce excess object allocations.
+     * <p>
+     * Always runs {@link #set} after the mutator has been applied to ensure that the changes made to the data are persisted.
+     *
+     * @param stack   the item stack to write the provided value to.
+     * @param initial the initial fallback value to provide to the mutator if no existing data was found.
+     * @param mutator the mutator function that will be applied to the stored value, or the initial fallback.
+     * @see #modify
+     */
+    @Contract(mutates = "param1,param2")
+    public void mutate(ItemStack stack, Supplier<T> initial, Consumer<T> mutator) {
+        var value = getOrGet(stack, initial);
+        mutator.accept(value);
+        set(stack, value);
     }
 
     /**

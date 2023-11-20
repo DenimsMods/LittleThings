@@ -4,6 +4,7 @@ import dev.denimred.littlethings.annotations.NbtType;
 import dev.denimred.littlethings.annotations.NotNullEverything;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Contract;
 
 import java.util.UUID;
@@ -183,6 +184,18 @@ public final class Facets {
     @Contract(value = "_, _, _ -> new", pure = true)
     public static Facet<ListTag> listFacet(@NbtType byte listType, String pathFirst, String... pathRem) {
         return new Facet<>(TAG_LIST, (tag, name) -> tag.getList(name, listType), CompoundTag::put, pathFirst, pathRem);
+    }
+
+    /**
+     * Constructs a new item stack facet.
+     *
+     * @param pathFirst the first element in the path, exists to ensure at least one element is present in the path.
+     * @param pathRem   the remaining elements in the path; the last element will become the facet's name.
+     * @return a new item stack facet.
+     */
+    @Contract(value = "_, _ -> new", pure = true)
+    public static Facet<ItemStack> stackFacet(String pathFirst, String... pathRem) {
+        return new Facet<>(TAG_COMPOUND, (tag, name) -> ItemStack.of(tag.getCompound(name)), (tag, name, value) -> tag.put(name, value.save(new CompoundTag())), pathFirst, pathRem);
     }
 
     private Facets() {

@@ -57,7 +57,7 @@ class FacetTest {
         Facet<Integer> facet = intFacet();
         ItemStack stack = freshStack();
         assertNull(facet.get(stack));
-        assertNull(facet.set(stack, 1));
+        facet.set(stack, 1);
         assertEquals(1, facet.get(stack));
     }
 
@@ -66,7 +66,7 @@ class FacetTest {
         Facet<Integer> facet = intFacet();
         ItemStack stack = freshStack();
         assertEquals(1, facet.getOr(stack, 1));
-        assertNull(facet.set(stack, 1));
+        facet.set(stack, 1);
         assertEquals(1, facet.getOr(stack, 0));
     }
 
@@ -75,7 +75,7 @@ class FacetTest {
         Facet<Integer> facet = intFacet();
         ItemStack stack = freshStack();
         assertThrowsExactly(NoSuchElementException.class, () -> facet.getOrThrow(stack));
-        assertNull(facet.set(stack, 1));
+        facet.set(stack, 1);
         assertEquals(1, assertDoesNotThrow(() -> facet.getOrThrow(stack)));
     }
 
@@ -83,10 +83,28 @@ class FacetTest {
     void set() {
         Facet<Integer> facet = intFacet();
         ItemStack stack = freshStack();
-        assertNull(facet.set(stack, 1));
+        facet.set(stack, 1);
         assertEquals(1, facet.get(stack));
-        assertEquals(1, facet.set(stack, 2));
+        facet.set(stack, 2);
         assertEquals(2, facet.get(stack));
+    }
+
+    @Test
+    void modify() {
+        Facet<Integer> facet = intFacet();
+        ItemStack stack = freshStack();
+        facet.modify(stack, 0, i -> i + 1);
+        assertEquals(1, facet.get(stack));
+    }
+
+    @Test
+    void mutate() {
+        Facet<ItemStack> facet = Facets.stackFacet("stack_facet");
+        ItemStack stack = freshStack();
+        facet.mutate(stack, FacetTest::freshStack, s -> s.shrink(s.getCount()));
+        var stored = facet.get(stack);
+        assertNotNull(stored);
+        assertTrue(stored.isEmpty());
     }
 
     @Test
@@ -96,7 +114,7 @@ class FacetTest {
         assertFalse(facet.isIn(stack));
         assertNull(facet.remove(stack));
         assertFalse(facet.isIn(stack));
-        assertNull(facet.set(stack, 1));
+        facet.set(stack, 1);
         assertTrue(facet.isIn(stack));
         assertEquals(1, facet.remove(stack));
         assertFalse(facet.isIn(stack));
