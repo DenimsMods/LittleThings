@@ -71,6 +71,15 @@ class FacetTest {
     }
 
     @Test
+    void getOrGet() {
+        Facet<Integer> facet = intFacet();
+        ItemStack stack = freshStack();
+        assertEquals(1, facet.getOrGet(stack, () -> 1));
+        facet.set(stack, 1);
+        assertEquals(1, facet.getOrGet(stack, () -> 0));
+    }
+
+    @Test
     void getOrThrow() {
         Facet<Integer> facet = intFacet();
         ItemStack stack = freshStack();
@@ -93,7 +102,9 @@ class FacetTest {
     void modify() {
         Facet<Integer> facet = intFacet();
         ItemStack stack = freshStack();
-        facet.modify(stack, 0, i -> i + 1);
+        assertFalse(facet.modify(stack, i -> i + 1));
+        facet.set(stack, 0);
+        assertTrue(facet.modify(stack, i -> i + 1));
         assertEquals(1, facet.get(stack));
     }
 
@@ -101,7 +112,9 @@ class FacetTest {
     void mutate() {
         Facet<ItemStack> facet = Facets.stackFacet("stack_facet");
         ItemStack stack = freshStack();
-        facet.mutate(stack, FacetTest::freshStack, s -> s.shrink(s.getCount()));
+        assertFalse(facet.mutate(stack, s -> s.shrink(s.getCount())));
+        facet.set(stack, freshStack());
+        assertTrue(facet.mutate(stack, s -> s.shrink(s.getCount())));
         var stored = facet.get(stack);
         assertNotNull(stored);
         assertTrue(stored.isEmpty());

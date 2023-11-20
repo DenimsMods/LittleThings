@@ -151,36 +151,40 @@ public final class Facet<T> {
     }
 
     /**
-     * Modifies the data stored in the stack's NBT data.
+     * Modifies the data stored in the stack's NBT data, if present.
      * Typically only used for immutable data structures like integers and strings.
      *
      * @param stack    the item stack to write the provided value to.
-     * @param initial  the initial fallback value to provide to the modifier if no existing data was found.
-     * @param modifier the modifier function that will be applied to the stored value, or the initial fallback.
+     * @param modifier the modifier function that will be applied to the stored value.
+     * @return true if the modifier was applied, false if no stored data was present.
      * @see #mutate
      */
     @Contract(mutates = "param1")
-    public void modify(ItemStack stack, T initial, Function<T, T> modifier) {
-        set(stack, modifier.apply(getOr(stack, initial)));
+    public boolean modify(ItemStack stack, Function<T, T> modifier) {
+        @Nullable T value = get(stack);
+        if (value == null) return false;
+        set(stack, modifier.apply(value));
+        return true;
     }
 
     /**
-     * Mutates the data stored in the stack's NBT data.
+     * Mutates the data stored in the stack's NBT data, if present.
      * Similar to the modify function, but assumes the data type is mutable.
-     * A supplier is used for the initial fallback to help ensure new data is provided if needed, and reduce excess object allocations.
      * <p>
      * Always runs {@link #set} after the mutator has been applied to ensure that the changes made to the data are persisted.
      *
      * @param stack   the item stack to write the provided value to.
-     * @param initial the initial fallback value to provide to the mutator if no existing data was found.
-     * @param mutator the mutator function that will be applied to the stored value, or the initial fallback.
+     * @param mutator the mutator function that will be applied to the stored value.
+     * @return true if the mutator was applied, false if no stored data was present.
      * @see #modify
      */
-    @Contract(mutates = "param1,param2")
-    public void mutate(ItemStack stack, Supplier<T> initial, Consumer<T> mutator) {
-        var value = getOrGet(stack, initial);
+    @Contract(mutates = "param1")
+    public boolean mutate(ItemStack stack, Consumer<T> mutator) {
+        @Nullable T value = get(stack);
+        if (value == null) return false;
         mutator.accept(value);
         set(stack, value);
+        return true;
     }
 
     /**
