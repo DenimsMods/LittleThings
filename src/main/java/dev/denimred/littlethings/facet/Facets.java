@@ -9,7 +9,6 @@ import org.jetbrains.annotations.Contract;
 
 import java.util.UUID;
 
-import static dev.denimred.littlethings.facet.Facet.Writer.remove;
 import static net.minecraft.nbt.Tag.*;
 
 /**
@@ -197,8 +196,11 @@ public final class Facets {
     @Contract(value = "_, _ -> new", pure = true)
     public static Facet<ItemStack> stackFacet(String pathFirst, String... pathRem) {
         return new Facet<>(TAG_COMPOUND, (tag, name) -> ItemStack.of(tag.getCompound(name)), (tag, name, value) -> {
-            if (value.isEmpty()) remove();
-            tag.put(name, value.save(new CompoundTag()));
+            if (value.isEmpty()) {
+                tag.remove(name);
+            } else {
+                tag.put(name, value.save(new CompoundTag()));
+            }
         }, pathFirst, pathRem);
     }
 

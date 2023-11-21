@@ -2,16 +2,17 @@ package dev.denimred.littlethings.facet;
 
 import dev.denimred.littlethings.annotations.NbtType;
 import dev.denimred.littlethings.annotations.NotNullEverything;
-import dev.denimred.littlethings.facet.Facet.Writer.Remove;
+import joptsimple.internal.Strings;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.world.item.ItemStack;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.VisibleForTesting;
 
-import javax.annotation.concurrent.Immutable;
 import java.util.NoSuchElementException;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -24,6 +25,7 @@ import java.util.function.UnaryOperator;
  */
 @NotNullEverything
 public final class Facet<T> {
+    private static final Logger LOGGER = LogManager.getLogger();
     @VisibleForTesting
     final String[] path;
     @VisibleForTesting
@@ -150,10 +152,15 @@ public final class Facet<T> {
      */
     @Contract(mutates = "param1")
     public void set(ItemStack stack, T value) {
-        try {
-            writer.write(getOrCreateLastTag(stack, path), name, value);
-        } catch (Remove ignored) {
+        var tag = getOrCreateLastTag(stack, path);
+        writer.write(tag, name, value);
+        var valueTag = tag.get(name);
+        if (valueTag == null) {
             remove(stack);
+        } else if (valueTag.getId() != type) {
+            remove(stack);
+            var joinedName = Strings.join(path, ".") + ":" + name;
+            LOGGER.warn("Facet {} tried to write data with wrong NBT type (expected type {}, got {})", joinedName, type, valueTag.getId());
         }
     }
 
@@ -206,7 +213,7 @@ public final class Facet<T> {
         assert root != null; // Sanity check; hasTag covers this
 
         // Special case for empty path
-        if (path.length == 0 && root.contains(name, type)) {
+        if (path.length == 0) {
             stack.removeTagKey(name);
             return;
         }
@@ -221,8 +228,7 @@ public final class Facet<T> {
 
         // Remove the data itself
         int lastIndex = tags.length - 1;
-        var last = tags[lastIndex];
-        if (last.contains(name, type)) last.remove(name);
+        tags[lastIndex].remove(name);
 
         // Recursively remove empty tags, starting from the end
         for (int i = lastIndex; i >= 0; i--) {
@@ -268,48 +274,9 @@ public final class Facet<T> {
          * @param tag   the tag to write data to.
          * @param name  the name of the data tag to be inserted into the containing tag.
          * @param value the data to be written to the tag.
-         * @throws Remove to indicate that the value being written should instead be removed.
          */
         @Contract(mutates = "param1")
         @ApiStatus.OverrideOnly
-        void write(CompoundTag tag, String name, T value) throws Remove;
-
-        /**
-         * Call in the body of {@link #write} to immediately return and tell the facet to instead remove the data being written to.
-         * <b>Always throws an exception; execution following this function will always cease.</b>
-         *
-         * @throws Remove to indicate that the value being written should instead be removed.
-         */
-        @Contract(value = "-> fail", pure = true)
-        static void remove() throws Remove {
-            throw Remove.INSTANCE;
-        }
-
-        /**
-         * Throwable used for flow control by {@link #write} to indicate that data being written should instead be discarded and removed from the tag.
-         */
-        @Immutable
-        final class Remove extends Throwable {
-            private static final Remove INSTANCE = new Remove();
-
-            private Remove() {
-                super();
-            }
-
-            @Override
-            public Throwable initCause(Throwable cause) {
-                return this;
-            }
-
-            @Override
-            public Throwable fillInStackTrace() {
-                return this;
-            }
-
-            @Override
-            public void setStackTrace(StackTraceElement[] stackTrace) {
-                // no-op
-            }
-        }
+        void write(CompoundTag tag, String name, T value);
     }
 }
