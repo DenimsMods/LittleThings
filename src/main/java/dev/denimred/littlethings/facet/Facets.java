@@ -8,9 +8,11 @@ import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -179,6 +181,25 @@ public final class Facets {
     }
 
     /**
+     * Constructs a new object facet of a desired type, wrapped by {@link CompoundTag} serialization.
+     *
+     * @param pathFirst the first element in the path, exists to ensure at least one element is present in the path.
+     * @param pathRem   the remaining elements in the path; the last element will become the facet's name.
+     * @return a new object facet of the specified type, wrapped by a compound tag.
+     */
+    public static <T> Facet<T> objectFacet(Function<CompoundTag, T> reader, BiConsumer<T, CompoundTag> writer, String pathFirst, String... pathRem) {
+        return new Facet<>(TAG_COMPOUND, (tag, name) -> reader.apply(tag.getCompound(name)), (tag, name, value) -> {
+            var raw = new CompoundTag();
+            writer.accept(value, raw);
+            if (raw.isEmpty()) {
+                tag.remove(name);
+            } else {
+                tag.put(name, raw);
+            }
+        }, pathFirst, pathRem);
+    }
+
+    /**
      * Constructs a new item stack facet that removes data when inputting an empty stack.
      *
      * @param pathFirst the first element in the path, exists to ensure at least one element is present in the path.
@@ -187,12 +208,8 @@ public final class Facets {
      */
     @Contract(value = "_, _ -> new", pure = true)
     public static Facet<ItemStack> stackFacet(String pathFirst, String... pathRem) {
-        return new Facet<>(TAG_COMPOUND, (tag, name) -> ItemStack.of(tag.getCompound(name)), (tag, name, value) -> {
-            if (value.isEmpty()) {
-                tag.remove(name);
-            } else {
-                tag.put(name, value.save(new CompoundTag()));
-            }
+        return objectFacet(ItemStack::of, (stack, tag) -> {
+            if (!stack.isEmpty()) stack.save(tag);
         }, pathFirst, pathRem);
     }
 
@@ -208,7 +225,7 @@ public final class Facets {
      * @return a new list facet of the given NBT type.
      */
     @Contract(value = "_, _, _, _, _ -> new", pure = true)
-    public static <T> Facet<List<T>> listFacet(@NbtType byte listType, BiFunction<ListTag, Integer, T> reader, Function<T, Tag> writer, String pathFirst, String... pathRem) {
+    public static <T> Facet<List<T>> listFacet(@NbtType byte listType, BiFunction<ListTag, Integer, T> reader, Function<T, @Nullable Tag> writer, String pathFirst, String... pathRem) {
         return new Facet<>(TAG_LIST, ListTagDelegate.reader(listType, reader, writer), ListTagDelegate.writer(writer), pathFirst, pathRem);
     }
 
@@ -222,6 +239,21 @@ public final class Facets {
     @Contract(value = "_, _ -> new", pure = true)
     public static Facet<List<String>> stringListFacet(String pathFirst, String... pathRem) {
         return listFacet(TAG_STRING, ListTag::getString, StringTag::valueOf, pathFirst, pathRem);
+    }
+
+    /**
+     * Constructs a new object list facet of a desired type, wrapped by {@link CompoundTag} serialization.
+     *
+     * @param pathFirst the first element in the path, exists to ensure at least one element is present in the path.
+     * @param pathRem   the remaining elements in the path; the last element will become the facet's name.
+     * @return a new object facet of the specified type, wrapped by a compound tag.
+     */
+    public static <T> Facet<List<T>> objectListFacet(Function<CompoundTag, T> reader, BiConsumer<T, CompoundTag> writer, String pathFirst, String... pathRem) {
+        return listFacet(TAG_COMPOUND, (list, i) -> reader.apply(list.getCompound(i)), (value) -> {
+            var raw = new CompoundTag();
+            writer.accept(value, raw);
+            return raw.isEmpty() ? null : raw;
+        }, pathFirst, pathRem);
     }
 
     private Facets() {

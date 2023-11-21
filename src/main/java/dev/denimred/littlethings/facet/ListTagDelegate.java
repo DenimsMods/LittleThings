@@ -5,6 +5,7 @@ import dev.denimred.littlethings.facet.Facet.Reader;
 import dev.denimred.littlethings.facet.Facet.Writer;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.AbstractList;
 import java.util.List;
@@ -21,14 +22,21 @@ final class ListTagDelegate<T> extends AbstractList<T> {
         return (tag, name) -> new ListTagDelegate<>(tag.getList(name, listType), reader, writer);
     }
 
-    static <T> Writer<List<T>> writer(Function<T, Tag> writer) {
+    static <T> Writer<List<T>> writer(Function<T, @Nullable Tag> writer) {
         return (tag, name, list) -> {
             if (list.isEmpty()) {
                 tag.remove(name);
             } else {
-                var raw1 = new ListTag();
-                for (T t : list) raw1.add(writer.apply(t));
-                tag.put(name, raw1);
+                var listTag = new ListTag();
+                for (T t : list) {
+                    var raw = writer.apply(t);
+                    if (raw != null) listTag.add(raw);
+                }
+                if (listTag.isEmpty()) {
+                    tag.remove(name);
+                } else {
+                    tag.put(name, listTag);
+                }
             }
         };
     }
