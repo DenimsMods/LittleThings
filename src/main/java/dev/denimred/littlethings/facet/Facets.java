@@ -4,10 +4,15 @@ import dev.denimred.littlethings.annotations.NbtType;
 import dev.denimred.littlethings.annotations.NotNullEverything;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Contract;
 
+import java.util.List;
 import java.util.UUID;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 import static net.minecraft.nbt.Tag.*;
 
@@ -174,19 +179,6 @@ public final class Facets {
     }
 
     /**
-     * Constructs a new list tag facet of a particular type backed by the standard {@link CompoundTag} functions.
-     *
-     * @param listType  the type of the list tag to be used.
-     * @param pathFirst the first element in the path, exists to ensure at least one element is present in the path.
-     * @param pathRem   the remaining elements in the path; the last element will become the facet's name.
-     * @return a new list tag facet of the given NBT type.
-     */
-    @Contract(value = "_, _, _ -> new", pure = true)
-    public static Facet<ListTag> listFacet(@NbtType byte listType, String pathFirst, String... pathRem) {
-        return new Facet<>(TAG_LIST, (tag, name) -> tag.getList(name, listType), CompoundTag::put, pathFirst, pathRem);
-    }
-
-    /**
      * Constructs a new item stack facet that removes data when inputting an empty stack.
      *
      * @param pathFirst the first element in the path, exists to ensure at least one element is present in the path.
@@ -202,6 +194,34 @@ public final class Facets {
                 tag.put(name, value.save(new CompoundTag()));
             }
         }, pathFirst, pathRem);
+    }
+
+    /**
+     * Constructs a new list facet of a particular type.
+     *
+     * @param listType  the type of the list tag to be used.
+     * @param reader    the function applied to the internal list tag to read the correct data type.
+     * @param writer    the function applied to the data type to convert it to a tag.
+     * @param pathFirst the first element in the path, exists to ensure at least one element is present in the path.
+     * @param pathRem   the remaining elements in the path; the last element will become the facet's name.
+     * @param <T>       the data type that the internal list tag wraps.
+     * @return a new list facet of the given NBT type.
+     */
+    @Contract(value = "_, _, _, _, _ -> new", pure = true)
+    public static <T> Facet<List<T>> listFacet(@NbtType byte listType, BiFunction<ListTag, Integer, T> reader, Function<T, Tag> writer, String pathFirst, String... pathRem) {
+        return new Facet<>(TAG_LIST, ListTagDelegate.reader(listType, reader, writer), ListTagDelegate.writer(writer), pathFirst, pathRem);
+    }
+
+    /**
+     * Constructs a new string list facet.
+     *
+     * @param pathFirst the first element in the path, exists to ensure at least one element is present in the path.
+     * @param pathRem   the remaining elements in the path; the last element will become the facet's name.
+     * @return a new string list facet of the given NBT type.
+     */
+    @Contract(value = "_, _ -> new", pure = true)
+    public static Facet<List<String>> stringListFacet(String pathFirst, String... pathRem) {
+        return listFacet(TAG_STRING, ListTag::getString, StringTag::valueOf, pathFirst, pathRem);
     }
 
     private Facets() {
