@@ -83,6 +83,7 @@ public final class Facet<T> {
      * Checks to see if the provided stack contains data that is managed by this facet.
      *
      * @param stack the item stack containing the NBT data to check.
+     *
      * @return true if the given stack contains NBT data pertaining to this facet.
      */
     @Contract(pure = true)
@@ -95,6 +96,7 @@ public final class Facet<T> {
      * Retrieves data from the provided stack.
      *
      * @param stack the item stack containing the NBT data to retrieve.
+     *
      * @return the facet data stored in the stack, or null if no applicable data was present.
      */
     @Contract(pure = true)
@@ -109,6 +111,7 @@ public final class Facet<T> {
      *
      * @param stack    the item stack containing the NBT data to retrieve.
      * @param fallback the value to return if no data was present.
+     *
      * @return the facet data stored in the stack, or the provided fallback if no applicable data was present.
      */
     @Contract(pure = true)
@@ -122,6 +125,7 @@ public final class Facet<T> {
      *
      * @param stack    the item stack containing the NBT data to retrieve.
      * @param fallback the supplier to call and return the result of if no data was present.
+     *
      * @return the facet data stored in the stack, or the result of the provided fallback if no applicable data was present.
      */
     @Contract(pure = true)
@@ -134,7 +138,9 @@ public final class Facet<T> {
      * Retrieves data from the provided stack.
      *
      * @param stack the item stack containing the NBT data to retrieve.
+     *
      * @return the facet data stored in the stack.
+     *
      * @throws NoSuchElementException if no applicable data was present in the stack.
      */
     @Contract(pure = true)
@@ -170,7 +176,9 @@ public final class Facet<T> {
      *
      * @param stack    the item stack to write the provided value to.
      * @param modifier the modifier function that will be applied to the stored value.
+     *
      * @return true if the modifier was applied, false if no stored data was present.
+     *
      * @see #mutate
      */
     @Contract(mutates = "param1")
@@ -189,7 +197,9 @@ public final class Facet<T> {
      *
      * @param stack   the item stack to write the provided value to.
      * @param mutator the mutator function that will be applied to the stored value.
+     *
      * @return true if the mutator was applied, false if no stored data was present.
+     *
      * @see #modify
      */
     @Contract(mutates = "param1")
@@ -254,6 +264,7 @@ public final class Facet<T> {
          *
          * @param tag  the tag that contains the data to read.
          * @param name the name of the element within the tag that represents the data to read.
+         *
          * @return the data that was stored in the tag, or null if the data couldn't be read or was invalid.
          */
         @Contract(pure = true)

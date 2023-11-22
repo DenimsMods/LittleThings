@@ -23,5 +23,4 @@ import static java.lang.annotation.ElementType.*;
 @TypeQualifierDefault({FIELD, METHOD, PARAMETER, TYPE_PARAMETER, TYPE_USE, RECORD_COMPONENT})
 @NotNull //  :^)
 @Nonnull // >:^)
-public @interface NotNullEverything {
-}
+public @interface NotNullEverything {}

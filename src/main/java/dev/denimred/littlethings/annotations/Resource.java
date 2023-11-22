@@ -35,8 +35,7 @@ public @interface Resource {
     @Retention(RetentionPolicy.CLASS)
     @Target({METHOD, FIELD, PARAMETER, LOCAL_VARIABLE, ANNOTATION_TYPE})
     @Pattern(ResourcePatterns.NAMESPACE)
-    @interface Namespace {
-    }
+    @interface Namespace {}
 
     /**
      * Indicates that the annotated element is a string that must follow the pattern of a {@link ResourceLocation} path.
@@ -49,23 +48,18 @@ public @interface Resource {
     @Retention(RetentionPolicy.CLASS)
     @Target({METHOD, FIELD, PARAMETER, LOCAL_VARIABLE, ANNOTATION_TYPE})
     @Pattern(ResourcePatterns.PATH)
-    @interface Path {
-    }
+    @interface Path {}
 }
 
 class ResourcePatterns {
     @RegExp
     private static final String NAMESPACE_CHARS = "[a-z0-9_.-]*";
-
-    @RegExp
-    private static final String PATH_CHARS = "[a-z0-9/._-]*";
-
     @RegExp
     static final String NAMESPACE = "^" + NAMESPACE_CHARS + "$";
-
+    @RegExp
+    private static final String PATH_CHARS = "[a-z0-9/._-]*";
     @RegExp
     static final String PATH = "^" + PATH_CHARS + "$";
-
     @RegExp
     static final String FULL = "^(" + NAMESPACE_CHARS + ":)?" + PATH_CHARS + "$";
 }

@@ -24,11 +24,16 @@ import static net.minecraft.nbt.Tag.*;
 @SuppressWarnings("unused")
 @NotNullEverything
 public final class Facets {
+    private Facets() {
+        throw new AssertionError();
+    }
+
     /**
      * Constructs a new boolean facet backed by the standard {@link CompoundTag} functions.
      *
      * @param pathFirst the first element in the path, exists to ensure at least one element is present in the path.
      * @param pathRem   the remaining elements in the path; the last element will become the facet's name.
+     *
      * @return a new boolean facet.
      */
     @Contract(value = "_, _ -> new", pure = true)
@@ -41,6 +46,7 @@ public final class Facets {
      *
      * @param pathFirst the first element in the path, exists to ensure at least one element is present in the path.
      * @param pathRem   the remaining elements in the path; the last element will become the facet's name.
+     *
      * @return a new byte facet.
      */
     @Contract(value = "_, _ -> new", pure = true)
@@ -53,6 +59,7 @@ public final class Facets {
      *
      * @param pathFirst the first element in the path, exists to ensure at least one element is present in the path.
      * @param pathRem   the remaining elements in the path; the last element will become the facet's name.
+     *
      * @return a new short facet.
      */
     @Contract(value = "_, _ -> new", pure = true)
@@ -65,6 +72,7 @@ public final class Facets {
      *
      * @param pathFirst the first element in the path, exists to ensure at least one element is present in the path.
      * @param pathRem   the remaining elements in the path; the last element will become the facet's name.
+     *
      * @return a new integer facet.
      */
     @Contract(value = "_, _ -> new", pure = true)
@@ -77,6 +85,7 @@ public final class Facets {
      *
      * @param pathFirst the first element in the path, exists to ensure at least one element is present in the path.
      * @param pathRem   the remaining elements in the path; the last element will become the facet's name.
+     *
      * @return a new long facet.
      */
     @Contract(value = "_, _ -> new", pure = true)
@@ -89,6 +98,7 @@ public final class Facets {
      *
      * @param pathFirst the first element in the path, exists to ensure at least one element is present in the path.
      * @param pathRem   the remaining elements in the path; the last element will become the facet's name.
+     *
      * @return a new float facet.
      */
     @Contract(value = "_, _ -> new", pure = true)
@@ -101,6 +111,7 @@ public final class Facets {
      *
      * @param pathFirst the first element in the path, exists to ensure at least one element is present in the path.
      * @param pathRem   the remaining elements in the path; the last element will become the facet's name.
+     *
      * @return a new double facet.
      */
     @Contract(value = "_, _ -> new", pure = true)
@@ -113,6 +124,7 @@ public final class Facets {
      *
      * @param pathFirst the first element in the path, exists to ensure at least one element is present in the path.
      * @param pathRem   the remaining elements in the path; the last element will become the facet's name.
+     *
      * @return a new byte array facet.
      */
     @Contract(value = "_, _ -> new", pure = true)
@@ -125,6 +137,7 @@ public final class Facets {
      *
      * @param pathFirst the first element in the path, exists to ensure at least one element is present in the path.
      * @param pathRem   the remaining elements in the path; the last element will become the facet's name.
+     *
      * @return a new integer array facet.
      */
     @Contract(value = "_, _ -> new", pure = true)
@@ -137,6 +150,7 @@ public final class Facets {
      *
      * @param pathFirst the first element in the path, exists to ensure at least one element is present in the path.
      * @param pathRem   the remaining elements in the path; the last element will become the facet's name.
+     *
      * @return a new long array facet.
      */
     @Contract(value = "_, _ -> new", pure = true)
@@ -149,6 +163,7 @@ public final class Facets {
      *
      * @param pathFirst the first element in the path, exists to ensure at least one element is present in the path.
      * @param pathRem   the remaining elements in the path; the last element will become the facet's name.
+     *
      * @return a new string facet.
      */
     @Contract(value = "_, _ -> new", pure = true)
@@ -161,6 +176,7 @@ public final class Facets {
      *
      * @param pathFirst the first element in the path, exists to ensure at least one element is present in the path.
      * @param pathRem   the remaining elements in the path; the last element will become the facet's name.
+     *
      * @return a new compound tag facet.
      */
     @Contract(value = "_, _ -> new", pure = true)
@@ -173,6 +189,7 @@ public final class Facets {
      *
      * @param pathFirst the first element in the path, exists to ensure at least one element is present in the path.
      * @param pathRem   the remaining elements in the path; the last element will become the facet's name.
+     *
      * @return a new UUID facet.
      */
     @Contract(value = "_, _ -> new", pure = true)
@@ -181,10 +198,26 @@ public final class Facets {
     }
 
     /**
+     * Constructs a new item stack facet that removes data when inputting an empty stack.
+     *
+     * @param pathFirst the first element in the path, exists to ensure at least one element is present in the path.
+     * @param pathRem   the remaining elements in the path; the last element will become the facet's name.
+     *
+     * @return a new item stack facet.
+     */
+    @Contract(value = "_, _ -> new", pure = true)
+    public static Facet<ItemStack> stackFacet(String pathFirst, String... pathRem) {
+        return objectFacet(ItemStack::of, (stack, tag) -> {
+            if (!stack.isEmpty()) stack.save(tag);
+        }, pathFirst, pathRem);
+    }
+
+    /**
      * Constructs a new object facet of a desired type, wrapped by {@link CompoundTag} serialization.
      *
      * @param pathFirst the first element in the path, exists to ensure at least one element is present in the path.
      * @param pathRem   the remaining elements in the path; the last element will become the facet's name.
+     *
      * @return a new object facet of the specified type, wrapped by a compound tag.
      */
     public static <T> Facet<T> objectFacet(Function<CompoundTag, T> reader, BiConsumer<T, CompoundTag> writer, String pathFirst, String... pathRem) {
@@ -200,17 +233,16 @@ public final class Facets {
     }
 
     /**
-     * Constructs a new item stack facet that removes data when inputting an empty stack.
+     * Constructs a new string list facet.
      *
      * @param pathFirst the first element in the path, exists to ensure at least one element is present in the path.
      * @param pathRem   the remaining elements in the path; the last element will become the facet's name.
-     * @return a new item stack facet.
+     *
+     * @return a new string list facet of the given NBT type.
      */
     @Contract(value = "_, _ -> new", pure = true)
-    public static Facet<ItemStack> stackFacet(String pathFirst, String... pathRem) {
-        return objectFacet(ItemStack::of, (stack, tag) -> {
-            if (!stack.isEmpty()) stack.save(tag);
-        }, pathFirst, pathRem);
+    public static Facet<List<String>> stringListFacet(String pathFirst, String... pathRem) {
+        return listFacet(TAG_STRING, ListTag::getString, StringTag::valueOf, pathFirst, pathRem);
     }
 
     /**
@@ -222,6 +254,7 @@ public final class Facets {
      * @param pathFirst the first element in the path, exists to ensure at least one element is present in the path.
      * @param pathRem   the remaining elements in the path; the last element will become the facet's name.
      * @param <T>       the data type that the internal list tag wraps.
+     *
      * @return a new list facet of the given NBT type.
      */
     @Contract(value = "_, _, _, _, _ -> new", pure = true)
@@ -230,22 +263,11 @@ public final class Facets {
     }
 
     /**
-     * Constructs a new string list facet.
-     *
-     * @param pathFirst the first element in the path, exists to ensure at least one element is present in the path.
-     * @param pathRem   the remaining elements in the path; the last element will become the facet's name.
-     * @return a new string list facet of the given NBT type.
-     */
-    @Contract(value = "_, _ -> new", pure = true)
-    public static Facet<List<String>> stringListFacet(String pathFirst, String... pathRem) {
-        return listFacet(TAG_STRING, ListTag::getString, StringTag::valueOf, pathFirst, pathRem);
-    }
-
-    /**
      * Constructs a new object list facet of a desired type, wrapped by {@link CompoundTag} serialization.
      *
      * @param pathFirst the first element in the path, exists to ensure at least one element is present in the path.
      * @param pathRem   the remaining elements in the path; the last element will become the facet's name.
+     *
      * @return a new object facet of the specified type, wrapped by a compound tag.
      */
     public static <T> Facet<List<T>> objectListFacet(Function<CompoundTag, T> reader, BiConsumer<T, CompoundTag> writer, String pathFirst, String... pathRem) {
@@ -254,9 +276,5 @@ public final class Facets {
             writer.accept(value, raw);
             return raw.isEmpty() ? null : raw;
         }, pathFirst, pathRem);
-    }
-
-    private Facets() {
-        throw new AssertionError();
     }
 }

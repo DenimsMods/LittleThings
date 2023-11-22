@@ -20,5 +20,4 @@ import static net.minecraft.nbt.Tag.*;
 @Retention(RetentionPolicy.SOURCE)
 @Target({FIELD, PARAMETER, LOCAL_VARIABLE, ANNOTATION_TYPE, METHOD})
 @MagicConstant(intValues = {TAG_END, TAG_BYTE, TAG_SHORT, TAG_INT, TAG_LONG, TAG_FLOAT, TAG_DOUBLE, TAG_BYTE_ARRAY, TAG_STRING, TAG_LIST, TAG_COMPOUND, TAG_INT_ARRAY, TAG_LONG_ARRAY, TAG_ANY_NUMERIC}, valuesFromClass = Tag.class)
-public @interface NbtType {
-}
+public @interface NbtType {}
