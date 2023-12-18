@@ -1,5 +1,6 @@
 plugins {
-    id("littlethings.module-conventions")
+    id("littlethings.conventions")
+    id("littlethings.testmod")
     alias(libs.plugins.kotlin.jvm)
 }
 

@@ -1,5 +1,5 @@
-plugins { id("littlethings.module-conventions") }
+plugins { id("littlethings.conventions") }
 
-version = "0.1.0-SNAPSHOT"
+version = "1.0.0"
 
 dependencies { compileOnly("com.google.code.findbugs:jsr305:3.0.2") }

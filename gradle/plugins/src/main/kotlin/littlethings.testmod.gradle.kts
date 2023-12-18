@@ -1,4 +1,3 @@
-@file:Suppress("UnstableApiUsage")
 
 import org.gradle.kotlin.dsl.support.uppercaseFirstChar
 import org.w3c.dom.Element
@@ -12,63 +11,21 @@ val libs = the<org.gradle.accessors.dm.LibrariesForLibs>()
 
 plugins {
     `java-library`
-    `maven-publish`
     id("fabric-loom")
     idea
-}
-
-group = rootProject.group
-base.archivesName.set(rootProject.base.archivesName.map { "${it}-${project.name}" })
-
-repositories {
-    maven("https://maven.parchmentmc.net/") {
-        name = "ParchmentMC (Mappings)"
-        content { includeGroup(libs.parchment.orNull?.group!!) }
-    }
-}
-
-dependencies {
-    minecraft(libs.minecraft)
-    mappings(loom.layered {
-        officialMojangMappings()
-        parchment(variantOf(libs.parchment) { artifactType("zip") })
-    })
-}
-
-java {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = sourceCompatibility
-    withSourcesJar()
-}
-
-tasks {
-    jar { from("LICENSE") }
-
-    withType<JavaCompile> {
-        options.encoding = "UTF-8"
-        options.release = 17
-    }
-
-    withType<AbstractArchiveTask> {
-        isReproducibleFileOrder = true
-        isPreserveFileTimestamps = false
-    }
-}
-
-publishing {
-    publications {
-        create<MavenPublication>("maven") {
-            artifactId = base.archivesName.get()
-            from(components["java"])
-        }
-    }
-    repositories { mavenLocal() }
 }
 
 val testmod by sourceSets.registering {
     compileClasspath += sourceSets.main.get().runtimeClasspath
     runtimeClasspath += sourceSets.main.get().runtimeClasspath
     resources { srcDir("src/testmod/generated") }
+}
+
+idea {
+    module {
+        testSources.from(testmod.get().allJava.srcDirs)
+        testResources.from(testmod.get().resources.srcDirs)
+    }
 }
 
 loom {
@@ -121,18 +78,7 @@ tasks.named("ideaSyncTask") {
 }
 
 dependencies {
-    if (project.name != "annotations") {
-        compileOnly(project(":annotations"))
-        testCompileOnly(project(":annotations"))
-        "testmodCompileOnly"(project(":annotations"))
-    }
     "modTestmodImplementation"(libs.fabric.api)
     "modTestmodImplementation"(libs.fabric.loader)
-}
-
-idea {
-    module {
-        testSources.from(testmod.get().allJava.srcDirs)
-        testResources.from(testmod.get().resources.srcDirs)
-    }
+    "testmodCompileOnly"(project(":annotations"))
 }
