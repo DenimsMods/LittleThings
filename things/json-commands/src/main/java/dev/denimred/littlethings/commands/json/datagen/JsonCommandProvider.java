@@ -22,6 +22,12 @@ public abstract class JsonCommandProvider implements DataProvider {
     protected final @Namespace String namespace;
     protected final Set<JsonCommand> commands = new HashSet<>();
 
+    /**
+     * Constructs a new JSON command provider under the desired namespace.
+     *
+     * @param generator the generator this provider will work with.
+     * @param namespace the namespace under which this provider will build its commands.
+     */
     public JsonCommandProvider(DataGenerator generator, @Namespace String namespace) {
         this.generator = generator;
         this.namespace = namespace;
@@ -30,28 +36,51 @@ public abstract class JsonCommandProvider implements DataProvider {
     /** This method will be called when the provider is run in order to build and assemble all the commands. */
     protected abstract void generateCommands();
 
-    /** Adds the provided command to be generated. Works on child nodes; will find the root itself. */
-    public void add(CommandBuilder command) {
+    /**
+     * Adds the provided command to be generated. Works on child nodes; will find the root itself.
+     *
+     * @param command the builder that contains the full description of a command to be assembled.
+     */
+    public void add(JsonCommandBuilder command) {
         var root = command;
         while (root.isChild()) root = root.pop();
         commands.add(root.assemble());
     }
 
-    public void add(RedirectBuilder redirect) {
+    /**
+     * Overload for {@link #add(JsonCommandBuilder)} that accepts a redirect builder instead.
+     * Will simply call {@link JsonCommandRedirectBuilder#pop()} to retrieve its command builder.
+     *
+     * @param redirect the redirect builder attached to its associated command builder.
+     */
+    public void add(JsonCommandRedirectBuilder redirect) {
         add(redirect.pop());
     }
 
-    /** Creates a new command builder with the provided name. */
+    /**
+     * Creates a new {@link JsonCommandBuilder}.
+     *
+     * @param name the name of the command being created.
+     *
+     * @return a fresh and empty command builder.
+     */
     @Contract(value = "_ -> new", pure = true)
-    public CommandBuilder command(@Path String name) {
-        return new CommandBuilder(this, null, name);
+    public JsonCommandBuilder command(@Path String name) {
+        return new JsonCommandBuilder(namespace, null, name);
     }
 
-    /** Creates a new command builder with a redirect to the desired target. */
+    /**
+     * Overload for {@link JsonCommandBuilder} that initializes it with a redirect to a target command.
+     * Used to create simple command aliases.
+     *
+     * @param name the name of the command being created.
+     * @param target the name of the target to redirect to.
+     *
+     * @return a new command builder with its redirect already defined.
+     */
     @Contract(value = "_, _ -> new", pure = true)
-    public CommandBuilder alias(@Path String name, @Path String target) {
-        return new CommandBuilder(this, null, name)
-                .redirect(target).pop();
+    public JsonCommandBuilder alias(@Path String name, @Path String target) {
+        return command(name).redirect(target).pop();
     }
 
     @Override
@@ -59,18 +88,13 @@ public abstract class JsonCommandProvider implements DataProvider {
         commands.clear();
         generateCommands();
         var root = new JsonObject();
-        for (var command : commands) command.write(getNamespace(), root);
-        var path = generator.getOutputFolder().resolve("data/" + getNamespace() + "/commands.json");
+        for (var command : commands) command.write(namespace, root);
+        var path = generator.getOutputFolder().resolve("data/" + namespace + "/commands.json");
         DataProvider.save(GSON, cache, root, path);
     }
 
     @Override
     public String getName() {
         return "JSON Commands";
-    }
-
-    @Contract(pure = true)
-    public final @Namespace String getNamespace() {
-        return namespace;
     }
 }

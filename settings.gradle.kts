@@ -22,7 +22,8 @@ fun includeModule(vararg modules: String) = modules.forEach { module ->
         if (buildFile.createNewFile()) {
             buildFile.writeText("plugins { id(\"littlethings.module-conventions\") }\n\nversion = \"0.1.0-SNAPSHOT\"\n")
             projectDir.resolve("src/main/java/dev/denimred/littlethings/$name").mkdirs()
-            projectDir.resolve("README.md").createNewFile()
+            val readme = projectDir.resolve("README.md")
+            if (readme.createNewFile()) readme.writeText("# $name\n\n[//]: # (TODO: Describe the $name module)")
         }
     }
 }

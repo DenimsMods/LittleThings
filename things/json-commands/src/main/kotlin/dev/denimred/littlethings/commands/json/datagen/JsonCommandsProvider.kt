@@ -9,18 +9,26 @@ public inline fun JsonCommandProvider(
     override fun generateCommands() = setup(this)
 }
 
-public inline fun JsonCommandProvider.command(@Path name: String, action: CommandBuilder.() -> Unit) {
+public inline fun JsonCommandProvider.command(
+    @Path name: String, action: JsonCommandBuilder.() -> Unit
+) {
     add(command(name).apply(action))
 }
 
-public inline fun JsonCommandProvider.alias(@Path name: String, @Path target: String, action: CommandBuilder.() -> Unit) {
+public inline fun JsonCommandProvider.alias(
+    @Path name: String, @Path target: String, action: JsonCommandBuilder.() -> Unit
+) {
     add(alias(name, target).apply(action))
 }
 
-public inline fun CommandBuilder.argument(@Path name: String, action: CommandBuilder.() -> Unit) {
+public inline fun JsonCommandBuilder.argument(
+    @Path name: String, action: JsonCommandBuilder.() -> Unit
+) {
     argument(name).apply(action)
 }
 
-public inline fun CommandBuilder.redirect(@Path target: String, action: RedirectBuilder.() -> Unit) {
+public inline fun JsonCommandBuilder.redirect(
+    @Path target: String, action: JsonCommandRedirectBuilder.() -> Unit
+) {
     redirect(target).apply(action)
 }
