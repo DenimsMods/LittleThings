@@ -1,0 +1,28 @@
+{
+  "alias_test": {
+    "redirect": "json_test"
+  },
+  "json_test": {
+    "arguments": {
+      "literal_child": {
+        "executable": true
+      },
+      "integer_child": {
+        "type": "brigadier:integer",
+        "parameters": {
+          "min": 0,
+          "max": 100
+        },
+        "level": "admins",
+        "executable": true
+      }
+    }
+  },
+  "triple_literal": {
+    "redirect": {
+      "target": "json_test/literal_child",
+      "modifier": true,
+      "forks": true
+    }
+  }
+}
