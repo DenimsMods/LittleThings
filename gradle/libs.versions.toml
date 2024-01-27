@@ -4,7 +4,7 @@ parchment = "2022.11.06"
 
 fabric-loader = "0.14.22"
 fabric-api = "0.76.0+1.18.2"
-fabric-loom = "1.4-SNAPSHOT"
+fabric-loom = "1.5-SNAPSHOT"
 
 kotlin = "1.8.21"
 junit = "5.10.1"

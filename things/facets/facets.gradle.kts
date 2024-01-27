@@ -1,3 +1,6 @@
-plugins { id("littlethings.conventions") }
+plugins {
+    id("littlethings.conventions")
+    id("littlethings.testmod")
+}
 
-version = "0.3.6"
+version = "0.4.0"

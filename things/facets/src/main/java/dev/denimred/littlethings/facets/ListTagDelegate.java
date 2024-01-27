@@ -1,6 +1,5 @@
 package dev.denimred.littlethings.facets;
 
-import dev.denimred.littlethings.annotations.NotNullEverything;
 import dev.denimred.littlethings.facets.Facet.Reader;
 import dev.denimred.littlethings.facets.Facet.Writer;
 import net.minecraft.nbt.ListTag;
@@ -12,7 +11,6 @@ import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
-@NotNullEverything
 final class ListTagDelegate<T> extends AbstractList<T> {
     private final ListTag raw;
     private final BiFunction<ListTag, Integer, T> reader;

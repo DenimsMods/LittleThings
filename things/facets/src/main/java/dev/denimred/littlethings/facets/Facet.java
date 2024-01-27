@@ -1,7 +1,6 @@
 package dev.denimred.littlethings.facets;
 
 import dev.denimred.littlethings.annotations.NbtType;
-import dev.denimred.littlethings.annotations.NotNullEverything;
 import joptsimple.internal.Strings;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
@@ -18,14 +17,15 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
+import static net.minecraft.nbt.Tag.TAG_END;
+
 /**
  * A simple abstraction around {@link ItemStack} NBT data.
  *
  * @param <T> the type that this facet handles.
  */
-@NotNullEverything
 public final class Facet<T> {
-    private static final Logger LOGGER = LogManager.getLogger();
+    static final Logger LOGGER = LogManager.getLogger();
     @VisibleForTesting final String[] path;
     @VisibleForTesting final String name;
     private final byte type;
@@ -35,7 +35,7 @@ public final class Facet<T> {
     /**
      * Constructs a new facet of the desired type with the given parameters.
      *
-     * @param type the NBT tag type that this facet processes.
+     * @param type the NBT tag type that this facet processes. Using TAG_END will prevent the facet from checking for a matching tag type.
      * @param reader the function invoked to read data from item data tags.
      * @param writer the function invoked to write data to item data tags.
      * @param pathFirst the first element in the path, exists to ensure at least one element is present in the path.
@@ -77,6 +77,10 @@ public final class Facet<T> {
         return tag;
     }
 
+    private boolean checkContains(CompoundTag tag) {
+        return type == TAG_END ? tag.contains(name) : tag.contains(name, type);
+    }
+
     /**
      * Checks to see if the provided stack contains data that is managed by this facet.
      *
@@ -87,7 +91,7 @@ public final class Facet<T> {
     @Contract(pure = true)
     public boolean isIn(ItemStack stack) {
         var tag = getLastTag(stack, path);
-        return tag != null && tag.contains(name, type);
+        return tag != null && checkContains(tag);
     }
 
     /**
@@ -100,8 +104,7 @@ public final class Facet<T> {
     @Contract(pure = true)
     public @Nullable T get(ItemStack stack) {
         var tag = getLastTag(stack, path);
-        if (tag == null || !tag.contains(name, type)) return null;
-        return reader.read(tag, name);
+        return tag != null && checkContains(tag) ? reader.read(tag, name) : null;
     }
 
     /**
@@ -154,14 +157,13 @@ public final class Facet<T> {
      * @param stack the item stack to write the provided value to.
      * @param value the value to be written to the stack.
      */
-    @Contract(mutates = "param1")
     public void set(ItemStack stack, T value) {
         var tag = getOrCreateLastTag(stack, path);
         writer.write(tag, name, value);
         var valueTag = tag.get(name);
         if (valueTag == null) {
             remove(stack);
-        } else if (valueTag.getId() != type) {
+        } else if (type != TAG_END && valueTag.getId() != type) {
             remove(stack);
             var joinedName = Strings.join(path, ".") + ":" + name;
             LOGGER.warn("Facet {} tried to write data with wrong NBT type (expected type {}, got {})", joinedName, type, valueTag.getId());
@@ -179,7 +181,6 @@ public final class Facet<T> {
      *
      * @see #mutate
      */
-    @Contract(mutates = "param1")
     public boolean modify(ItemStack stack, UnaryOperator<T> modifier) {
         @Nullable T value = get(stack);
         if (value == null) return false;
@@ -200,7 +201,6 @@ public final class Facet<T> {
      *
      * @see #modify
      */
-    @Contract(mutates = "param1")
     public boolean mutate(ItemStack stack, Consumer<T> mutator) {
         @Nullable T value = get(stack);
         if (value == null) return false;
@@ -214,7 +214,6 @@ public final class Facet<T> {
      *
      * @param stack the stack to remove data from.
      */
-    @Contract(mutates = "param1")
     public void remove(ItemStack stack) {
         if (!stack.hasTag()) return;
         var root = stack.getTag();
@@ -284,7 +283,6 @@ public final class Facet<T> {
          * @param name the name of the data tag to be inserted into the containing tag.
          * @param value the data to be written to the tag.
          */
-        @Contract(mutates = "param1")
         @ApiStatus.OverrideOnly
         void write(CompoundTag tag, String name, T value);
     }
