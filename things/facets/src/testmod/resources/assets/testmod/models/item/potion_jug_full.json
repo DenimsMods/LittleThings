@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "testmod:item/glass_jug",
+    "layer1": "testmod:item/potion_jug_overlay_full"
+  }
+}

@@ -6,6 +6,9 @@
   "entrypoints": {
     "main": [
       "dev.denimred.littlethings.testmod.FacetsTest"
+    ],
+    "client": [
+      "dev.denimred.littlethings.testmod.FacetsTestClient"
     ]
   }
 }

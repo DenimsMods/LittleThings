@@ -1,0 +1,14 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "testmod:item/mob_yoinker"
+  },
+  "overrides": [
+    {
+      "predicate": {
+        "testmod:mob_yoinker_full": 1
+      },
+      "model": "testmod:item/mob_yoinker_full"
+    }
+  ]
+}

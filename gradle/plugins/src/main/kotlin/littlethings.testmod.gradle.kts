@@ -61,4 +61,5 @@ dependencies {
     "modTestmodImplementation"(libs.fabric.api)
     "modTestmodImplementation"(libs.fabric.loader)
     "testmodCompileOnly"(project(":annotations"))
+    "testmodCompileOnly"("org.jetbrains:annotations:24.0.1")
 }
