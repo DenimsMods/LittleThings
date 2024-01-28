@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "id": "testmod",
+  "name": "JSON Commands Testmod",
+  "version": "0.0.0",
+  "entrypoints": {
+    "main": [
+      "dev.denimred.littlethings.testmod.FacetsTest"
+    ]
+  }
+}
