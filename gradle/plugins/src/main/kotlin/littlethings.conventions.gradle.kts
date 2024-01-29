@@ -6,11 +6,22 @@ plugins {
     `java-library`
     `maven-publish`
     id("fabric-loom")
+    `version-catalog`
     idea
 }
 
 group = rootProject.group
 base.archivesName.set(rootProject.base.archivesName.map { "${it}-${project.name}" })
+
+inline val self get() = project
+rootProject.tasks.named("generateCatalogAsToml") {
+    rootProject.catalog {
+        versionCatalog {
+            version(self.name, self.version.toString())
+            library(self.name, self.group.toString(), self.base.archivesName.get()).versionRef(self.name)
+        }
+    }
+}
 
 if (project.name != "annotations") {
     dependencies {

@@ -9,12 +9,12 @@ pluginManagement {
 
 rootProject.name = "littlethings"
 
-includeModule("annotations")
-includeModule("facets")
-includeModule("json-commands")
-includeModule("todo")
+thing("annotations")
+thing("facets")
+thing("json-commands")
+thing("todo")
 
-fun includeModule(vararg modules: String) = modules.forEach { module ->
+fun thing(vararg modules: String) = modules.forEach { module ->
     include(module)
     project(":$module").apply {
         projectDir = file("things/$name").apply { mkdirs() }
