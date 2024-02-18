@@ -53,25 +53,26 @@ private fun prepareContractArgs(params: String): String {
     return ", _".repeat(count)
 }
 
-private const val T_PREFIX = "__prefix"
-private const val T_EXC_CLASS = "__excClass"
-private const val T_MSG_PARAMS = "__msgParams"
-private const val T_MSG_EXPR = "__msgExpr"
-private const val T_CONTRACT_ARGS = "__contractArgs"
-private const val T_EQ_PRIM_TYPE = "__eqType"
-private const val T_EQ_MSG_TYPE = "__eqMsgType"
+@Language("n/a") private const val T_PREFIX = "__prefix"
+@Language("n/a") private const val T_EXC_CLASS = "__excClass"
+@Language("n/a") private const val T_MSG_PARAMS = "__msgParams"
+@Language("n/a") private const val T_MSG_EXPR = "__msgExpr"
+@Language("n/a") private const val T_CONTRACT_ARGS = "__contractArgs"
+@Language("n/a") private const val T_EQ_PRIM_TYPE = "__eqType"
+@Language("n/a") private const val T_EQ_MSG_TYPE = "__eqMsgType"
 
 data class PreparedMessageParams(val params: String, val contract: String, val expression: String) {
     constructor(params: String, expression: String) : this(params, prepareContractArgs(params), expression)
 }
 
 val NO_MSG = PreparedMessageParams("", "")
+val SIMPLE_MSG = PreparedMessageParams(", @NotNull String message", "message")
 val FORMATTED_MSG = PreparedMessageParams(", @PrintFormat @NotNull String message, @Nullable Object @NotNull ... args", "safeFormat(message, args)")
 val LAZY_MSG = PreparedMessageParams(", @NotNull Supplier<@Nullable String> lazyMessage", "lazyMessage.get()")
 val EQ_FORMATTED_MSG = PreparedMessageParams(", @PrintFormat @NotNull String message", "safeFormat(message, a, b)")
 val EQ_LAZY_MSG = PreparedMessageParams(", @NotNull $T_EQ_MSG_TYPE lazyMessage", "lazyMessage.apply(a, b)")
 
-private val MSG_KINDS = listOf(NO_MSG, FORMATTED_MSG, LAZY_MSG)
+private val MSG_KINDS = listOf(NO_MSG, SIMPLE_MSG, FORMATTED_MSG, LAZY_MSG)
 private val EQ_MSG_KINDS = listOf(NO_MSG, EQ_FORMATTED_MSG, EQ_LAZY_MSG)
 
 @Language("java")

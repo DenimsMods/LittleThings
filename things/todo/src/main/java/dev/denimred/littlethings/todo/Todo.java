@@ -21,7 +21,11 @@ public final class Todo extends Error {
      * @param <NOTHING> the "returned" type; technically discarded as this function never returns.
      *
      * @return nothing at all, as this function always throws an exception.
+     *
+     * @deprecated to emit a compiler warning/error to ensure TODOs don't remain in production code.
      */
+    @SuppressWarnings("DeprecatedIsStillUsed")
+    @Deprecated(forRemoval = true) // To emit warning/error
     @Contract(value = "-> fail", pure = true)
     public static <NOTHING> NOTHING TODO() throws Todo {
         throw new Todo().trimStackTrace();
@@ -35,7 +39,11 @@ public final class Todo extends Error {
      * @param <NOTHING> the "returned" type; technically discarded as this function never returns.
      *
      * @return nothing at all, as this function always throws an exception.
+     *
+     * @deprecated to emit a compiler warning/error to ensure TODOs don't remain in production code.
      */
+    @SuppressWarnings("DeprecatedIsStillUsed")
+    @Deprecated(forRemoval = true) // To emit warning/error
     @Contract(value = "_ -> fail", pure = true)
     public static <NOTHING> NOTHING TODO(String msg) throws Todo {
         throw new Todo(msg).trimStackTrace();
