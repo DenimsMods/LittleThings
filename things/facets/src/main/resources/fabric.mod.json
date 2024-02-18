@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "id": "littlethings-facets",
+  "version": "${version}",
+  "name": "Facets Thing",
+  "description": "A handy abstraction around item stack NBT data.",
+  "authors": [
+    "DenimRed"
+  ],
+  "icon": "assets/littlethings/icon.png",
+  "license": "MIT",
+  "custom": {
+    "modmenu": {
+      "parent": {
+        "id": "littlethings",
+        "name": "LittleThings",
+        "description": "A little library with little things for a large game.",
+        "icon": "assets/littlethings/icon.png",
+        "badges": [
+          "library"
+        ]
+      },
+      "badges": [
+        "library"
+      ]
+    }
+  }
+}

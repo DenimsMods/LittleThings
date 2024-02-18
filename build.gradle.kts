@@ -11,7 +11,8 @@ base.archivesName.set("littlethings")
 tasks.named("generateCatalogAsToml") {
     catalog {
         versionCatalog {
-            bundle("dev", listOf("annotations", "todo"))
+            bundle("dev-comp", listOf("annotations", "todo"))
+            bundle("dev-impl", listOf("assertions"))
         }
     }
 }
@@ -20,7 +21,7 @@ publishing {
     publications {
         create<MavenPublication>("catalog") {
             groupId = group.toString()
-            artifactId = base.archivesName.get() + "-catalog"
+            artifactId = "catalog"
             version = libs.versions.minecraft.get()
             from(components["versionCatalog"])
         }

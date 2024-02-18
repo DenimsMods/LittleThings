@@ -11,7 +11,11 @@ plugins {
 }
 
 group = rootProject.group
-base.archivesName.set(rootProject.base.archivesName.map { "${it}-${project.name}" })
+base.archivesName.set(project.name)
+
+loom {
+
+}
 
 inline val self get() = project
 rootProject.tasks.named("generateCatalogAsToml") {
@@ -56,7 +60,10 @@ java {
 }
 
 tasks {
-    jar { from("LICENSE") }
+    jar {
+        manifest { attributes["Fabric-Loom-Remap"] = true }
+        from("LICENSE")
+    }
 
     withType<JavaCompile> {
         options.encoding = "UTF-8"
@@ -66,6 +73,11 @@ tasks {
     withType<AbstractArchiveTask> {
         isReproducibleFileOrder = true
         isPreserveFileTimestamps = false
+    }
+
+    processResources {
+        inputs.property("version", version)
+        filesMatching("fabric.mod.json") { expand("version" to version) }
     }
 }
 

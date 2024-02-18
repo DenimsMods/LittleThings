@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "id": "littlethings-json-commands",
+  "version": "${version}",
+  "name": "JSON Commands Thing",
+  "description": "Data-driven JSON commands that can be created and modified by standard datapacks.",
+  "authors": [
+    "DenimRed"
+  ],
+  "icon": "assets/littlethings/icon.png",
+  "license": "MIT",
+  "custom": {
+    "modmenu": {
+      "parent": {
+        "id": "littlethings",
+        "name": "LittleThings",
+        "description": "A little library with little things for a large game.",
+        "icon": "assets/littlethings/icon.png",
+        "badges": [
+          "library"
+        ]
+      },
+      "badges": [
+        "library"
+      ]
+    }
+  }
+}
