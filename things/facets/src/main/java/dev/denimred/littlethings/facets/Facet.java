@@ -2,12 +2,13 @@ package dev.denimred.littlethings.facets;
 
 import dev.denimred.littlethings.annotations.NbtType;
 import joptsimple.internal.Strings;
+import net.minecraft.advancements.critereon.NbtPredicate;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.world.item.ItemStack;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.ApiStatus.OverrideOnly;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.VisibleForTesting;
@@ -57,7 +58,7 @@ public final class Facet<T> {
         }
     }
 
-    private static @Nullable CompoundTag getLastTag(ItemStack stack, String[] path) {
+    private static @Nullable CompoundTag getParentTag(ItemStack stack, String[] path) {
         if (!stack.hasTag()) return null;
         var tag = stack.getTag();
         assert tag != null; // Sanity check; hasTag covers this
@@ -68,8 +69,8 @@ public final class Facet<T> {
         return tag;
     }
 
-    private static CompoundTag getOrCreateLastTag(ItemStack stack, String[] path) {
-        var tag = stack.getOrCreateTag();
+    private static CompoundTag getOrCreateParentTag(CompoundTag root, String[] path) {
+        var tag = root;
         for (String key : path) {
             if (!tag.contains(key, Tag.TAG_COMPOUND)) tag.put(key, new CompoundTag());
             tag = tag.getCompound(key);
@@ -77,8 +78,47 @@ public final class Facet<T> {
         return tag;
     }
 
+    private static CompoundTag getOrCreateParentTag(ItemStack stack, String[] path) {
+        return getOrCreateParentTag(stack.getOrCreateTag(), path);
+    }
+
     private boolean checkContains(CompoundTag tag) {
         return type == TAG_END ? tag.contains(name) : tag.contains(name, type);
+    }
+
+    /**
+     * Creates an NBT predicate from this facet, primarily for use in datagen.
+     *
+     * @param expectation the value that's expected in the predicate.
+     *
+     * @return a new {@link NbtPredicate} that matches this facet with the expected value.
+     */
+    @SuppressWarnings("unused") // TODO: Make test for Facet.createPredicate()
+    @Contract(value = "_ -> new", pure = true)
+    public NbtPredicate createPredicate(T expectation) {
+        return createPredicate(expectation, null);
+    }
+
+    /**
+     * Creates an NBT predicate from this facet, primarily for use in datagen.
+     *
+     * @param expectation the value that's expected in the predicate.
+     * @param adjustment an adjustment to apply to the final expected NBT tag, in case some data should be ignored.
+     * @param <P> the expected tag type. Performs an unchecked cast, so be sure you know what the type will be to avoid a CCE.
+     *
+     * @return a new {@link NbtPredicate} that matches this facet with the expected value.
+     */
+    @SuppressWarnings("unchecked")
+    @Contract(value = "_, _ -> new", pure = true)
+    public <P extends Tag> NbtPredicate createPredicate(T expectation, @Nullable Consumer<P> adjustment) {
+        var root = new CompoundTag();
+        var parent = getOrCreateParentTag(root, path);
+        writer.write(parent, name, expectation);
+        if (adjustment != null) {
+            var tag = parent.get(name);
+            if (tag != null) adjustment.accept((P) tag);
+        }
+        return new NbtPredicate(root);
     }
 
     /**
@@ -90,7 +130,7 @@ public final class Facet<T> {
      */
     @Contract(pure = true)
     public boolean isIn(ItemStack stack) {
-        var tag = getLastTag(stack, path);
+        var tag = getParentTag(stack, path);
         return tag != null && checkContains(tag);
     }
 
@@ -103,7 +143,7 @@ public final class Facet<T> {
      */
     @Contract(pure = true)
     public @Nullable T get(ItemStack stack) {
-        var tag = getLastTag(stack, path);
+        var tag = getParentTag(stack, path);
         return tag != null && checkContains(tag) ? reader.read(tag, name) : null;
     }
 
@@ -158,7 +198,7 @@ public final class Facet<T> {
      * @param value the value to be written to the stack.
      */
     public void set(ItemStack stack, T value) {
-        var tag = getOrCreateLastTag(stack, path);
+        var tag = getOrCreateParentTag(stack, path);
         writer.write(tag, name, value);
         var valueTag = tag.get(name);
         if (valueTag == null) {
@@ -265,7 +305,7 @@ public final class Facet<T> {
          * @return the data that was stored in the tag, or null if the data couldn't be read or was invalid.
          */
         @Contract(pure = true)
-        @ApiStatus.OverrideOnly
+        @OverrideOnly
         @Nullable T read(CompoundTag tag, String name);
     }
 
@@ -283,7 +323,7 @@ public final class Facet<T> {
          * @param name the name of the data tag to be inserted into the containing tag.
          * @param value the data to be written to the tag.
          */
-        @ApiStatus.OverrideOnly
+        @OverrideOnly
         void write(CompoundTag tag, String name, T value);
     }
 }
